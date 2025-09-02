@@ -1,0 +1,416 @@
+{
+  "name": "Spotify_playlist",
+  "nodes": [
+    {
+      "parameters": {
+        "url": "https://api.spotify.com/v1/me",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "oAuth2Api",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        976,
+        -64
+      ],
+      "id": "de543ce5-a14f-4a1d-b3f7-2e86b35d3ac4",
+      "name": "me",
+      "credentials": {
+        "oAuth2Api": {
+          "id": "scgdeob3XDqDtZii",
+          "name": "Spotify (Generic OAuth2)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// input: response from /me/top/tracks\nconst items = $json.items || [];\nreturn [{\n  uris: items.map(t => t.uri)   // <-- outputs an array of URIs\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        416,
+        0
+      ],
+      "id": "5b62db3a-b855-49bf-9caf-d3e956fc69d2",
+      "name": "Pick uri"
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "=https://api.spotify.com/v1/playlists/{{ $json.playlistId || $json.id }}/tracks\n",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "oAuth2Api",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"uris\": $node[\"Pick uri\"].json.uris } }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2144,
+        -16
+      ],
+      "id": "270fa9d2-165d-4c7a-b841-a41820d0890a",
+      "name": "put songs",
+      "credentials": {
+        "oAuth2Api": {
+          "id": "scgdeob3XDqDtZii",
+          "name": "Spotify (Generic OAuth2)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.spotify.com/v1/users/{{ $node[\"me\"].json.id }}/playlists",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "oAuth2Api",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"name\": \"Weekly Wrapped (n8n)\",\n  \"description\": \"Auto playlist via n8n ⚡\",\n  \"public\": false\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1936,
+        -32
+      ],
+      "id": "70b2de87-1b11-454e-aed5-c52598b9f85d",
+      "name": "Create_playlist",
+      "credentials": {
+        "oAuth2Api": {
+          "id": "scgdeob3XDqDtZii",
+          "name": "Spotify (Generic OAuth2)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://api.spotify.com/v1/me/playlists?limit=50",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "oAuth2Api",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1216,
+        -128
+      ],
+      "id": "783a5d69-227d-4925-b110-7a5652ed66af",
+      "name": "Find_all_myplaylists",
+      "credentials": {
+        "oAuth2Api": {
+          "id": "scgdeob3XDqDtZii",
+          "name": "Spotify (Generic OAuth2)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "### Find all existing playlists\nInstead of making a new playlist each time, we search to see if the name of our playlist that we want to create, already exists",
+        "height": 96,
+        "width": 224,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1168,
+        32
+      ],
+      "typeVersion": 1,
+      "id": "9e73fd87-0ce2-4732-a41d-dbcd977c108b",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "### Review list from prev node\npulls out the ID if the one in question already exists\n",
+        "height": 112,
+        "width": 192,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1424,
+        -144
+      ],
+      "typeVersion": 1,
+      "id": "3948d755-8c54-459e-bc99-cbe6902db12a",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "8b0a2522-1bf0-4fb4-bbea-ec4539a09a71",
+              "leftValue": "={{ $json.playlistId !== null }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1712,
+        -16
+      ],
+      "id": "0b9615a4-ec4d-42d0-8ebd-2f665046ebcf",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "3c4d252c-dffc-4903-8be0-0367d8c643a1",
+              "leftValue": "={{ $json.uris }}",
+              "rightValue": "",
+              "operator": {
+                "type": "array",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        624,
+        0
+      ],
+      "id": "2330d5b3-b638-40e4-b426-c8d014620160",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "content": "### Check array\nIf the output empty? meaning - are there any uri's? ",
+        "height": 96,
+        "width": 176
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        592,
+        144
+      ],
+      "typeVersion": 1,
+      "id": "3cf9ca5f-7d42-46ff-b41c-808bf99174a4",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "### My Spotify Profile\nGoes to my profile (GET) to authenticate my profile - name, email, id, product (eg premium)",
+        "height": 112,
+        "width": 208,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        912,
+        80
+      ],
+      "typeVersion": 1,
+      "id": "311b6372-58f7-49a4-9ef3-9f9b4b96a606",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "url": "https://api.spotify.com/v1/me/top/tracks?limit=25&time_range=short_term",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "oAuth2Api",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "543bb974-f169-4bcc-8929-3f28fb613e9f",
+      "name": "top songs",
+      "credentials": {
+        "oAuth2Api": {
+          "id": "scgdeob3XDqDtZii",
+          "name": "Spotify (Generic OAuth2)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "triggerAtDay": [
+                4
+              ],
+              "triggerAtHour": 11
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "348f021d-54e0-44cd-a1bd-93219e0c6173",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "jsCode": "const p = ($json.items || []).find(x => x.name === \"Weekly Wrapped (n8n)\");\nreturn [{ playlistId: p?.id || null }];\n\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1456,
+        32
+      ],
+      "id": "8cae31b8-1c8b-41dd-a12c-2b314b408136",
+      "name": "FindWeekly"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "me": {
+      "main": [
+        [
+          {
+            "node": "Find_all_myplaylists",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pick uri": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create_playlist": {
+      "main": [
+        [
+          {
+            "node": "put songs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "put songs": {
+      "main": [
+        []
+      ]
+    },
+    "Find_all_myplaylists": {
+      "main": [
+        [
+          {
+            "node": "FindWeekly",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "me",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "top songs": {
+      "main": [
+        [
+          {
+            "node": "Pick uri",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FindWeekly": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Create_playlist",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create_playlist",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "072bc231-90e3-4622-8b56-9e7a7ac5b3af",
+  "meta": {
+    "instanceId": "2d8a5435430a8cadd49e92cf9c42bbb3fefc0603be98cc65f90f44c842ac2b45"
+  },
+  "id": "4WMBDXZri1M4neit",
+  "tags": []
+}
