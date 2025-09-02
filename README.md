@@ -15,17 +15,16 @@ This tutorial project is designed for **beginners**, with step-by-step setup and
 
 ## 📂 Repo Contents
 
+README.md
+spotify_mood_playlist.workflow.json
+.env.example
+assets/
+   ├── demo.gif
+   └── screenshots/
+        ├── n8n-flow.png
+        ├── playlist-result.png
+        └── tally-form.png   (optional)
 
-n8n-spotify-mood-playlist/
-├── README.md
-├── spotify_mood_playlist.workflow.json # Importable n8n workflow
-├── .env.example # Example environment file
-└── assets/
-├── demo.gif # Workflow demo (optional)
-└── screenshots/
-├── n8n-flow.png
-├── tally-form.png # If using a form
-└── playlist-result.png
 
 
 ---
